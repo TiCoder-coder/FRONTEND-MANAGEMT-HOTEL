@@ -25,12 +25,36 @@ import {
 } from "../../../constants/phoneCountries";
 
 function toMessage(err: any) {
-  return (
-    err?.response?.data?.message ||
-    err?.response?.data?.error ||
-    err?.message ||
-    "An error occurred."
-  );
+  const data = err?.response?.data;
+
+  const msg =
+    data?.message ??
+    data?.error ??
+    data?.detail ??
+    data?.errors ??
+    err?.message;
+
+  if (typeof msg === "string") return msg;
+
+  if (Array.isArray(msg)) {
+    return msg.map(String).join("\n");
+  }
+
+  if (msg && typeof msg === "object") {
+    try {
+      return Object.entries(msg)
+        .map(([k, v]) =>
+          Array.isArray(v)
+            ? `${k}: ${v.map(String).join(", ")}`
+            : `${k}: ${String(v)}`,
+        )
+        .join("\n");
+    } catch {
+      return JSON.stringify(msg);
+    }
+  }
+
+  return "An error occurred.";
 }
 
 export default function ResetPasswordScreen() {
@@ -125,7 +149,9 @@ export default function ResetPasswordScreen() {
   const onReset = async () => {
     const e = email.trim();
     const p = fullPhone;
-    const o = otp.trim();
+    const o = otp.replace(/\D/g, "").trim(); // sạch 100%
+    const otpNumber = Number(o);
+
     const np = newPassword;
 
     if (!e) {
@@ -136,7 +162,8 @@ export default function ResetPasswordScreen() {
       Alert.alert("Missing information", "Please enter the phone number.");
       return;
     }
-    if (!o) {
+
+    if (!Number.isFinite(otpNumber)) {
       Alert.alert("Incomplete information", "Please enter the OTP.");
       return;
     }
@@ -157,7 +184,7 @@ export default function ResetPasswordScreen() {
       const payload = {
         email: e,
         phone: p,
-        otp: o,
+        otp: otpNumber,
         new_password: np,
       };
 
@@ -256,7 +283,7 @@ export default function ResetPasswordScreen() {
                 </View>
                 <TextInput
                   value={otp}
-                  onChangeText={setOtp}
+                  onChangeText={(t) => setOtp(t.replace(/\D/g, ""))} // chỉ giữ 0-9
                   placeholder="OTP"
                   placeholderTextColor="rgba(255,255,255,0.55)"
                   keyboardType="number-pad"

@@ -124,10 +124,10 @@ export default function ChangePasswordScreen() {
     try {
       setSubmitting(true);
 
-      await api.post(CHANGE_PASSWORD_PATH, {
-        oldPassword: oldPassword.trim(),
-        newPassword: newPassword.trim(),
-        confirmPassword: confirmNewPassword.trim(),
+      await api.patch(CHANGE_PASSWORD_PATH, {
+        old_password: oldPassword.trim(),
+        new_password: newPassword.trim(),
+        confirm_password: confirmNewPassword.trim(),
       });
 
       Alert.alert("Success", "Password changed successfully.", [
