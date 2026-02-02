@@ -1,11 +1,13 @@
 import type { ImageSourcePropType } from "react-native";
 
+// Định nghĩa một type cho một country
 export type PhoneCountry = {
   name: string;
   callingCode: string;
   flag: ImageSourcePropType;
 };
 
+// Hàm xử lý calling -- Chuẩn hoá các số đầu khi UI gọi
 export function parseCallingCodes(callingCode: string): string[] {
   return callingCode
     .split(",")
@@ -17,6 +19,7 @@ export function primaryCallingCode(callingCode: string): string {
   return parseCallingCodes(callingCode)[0] ?? callingCode.trim();
 }
 
+// Load các hình ảnh lá cờ
 export const FLAG: Record<string, ImageSourcePropType> = {
   Afghanistan: require("../../assets/icons/flag/Afghanistan.jpg"),
   Albania: require("../../assets/icons/flag/Albania.jpg"),
@@ -232,6 +235,7 @@ export const FLAG: Record<string, ImageSourcePropType> = {
   SaintKittsAndNevis: require("../../assets/icons/flag/Saint_Kitts_and_Nevis.png"),
 };
 
+// Định nghĩa số điện thoại của các quốc gia
 export const PHONE_COUNTRIES: PhoneCountry[] = [
   { name: "Canada", callingCode: "1", flag: FLAG.Canada },
   { name: "United States", callingCode: "1", flag: FLAG.USA },

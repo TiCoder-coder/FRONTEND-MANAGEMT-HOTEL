@@ -131,8 +131,12 @@ export default function HomeScreen() {
 
   // Đồng bộ kích thước giữa macbook, tablet, và iphone,...
   const { width, height } = useWindowDimensions();
+  const isTablet = width >= 768 && width < 1024;
   const isLandscape = width > height;
+  const shortestSide = Math.min(width, height);
 
+  // Tablet native (Android/iOS): thường shortestSide >= 600 là tablet
+  const isNativeTablet = Platform.OS !== "web" && shortestSide >= 600;
   const pageMaxWidth = useMemo(() => {
     return width >= 1024 ? 980 : width >= 768 ? 720 : 520;
   }, [width]);
@@ -157,9 +161,15 @@ export default function HomeScreen() {
   }, [innerWidth, tileCols]);
 
   const bigCols = useMemo(() => {
-    if (width >= 992) return 3;
+    // Android/iOS tablet: LUÔN 2 cột
+    if (isNativeTablet) return 2;
+
+    // Web/desktop: màn hình rộng thì 3 cột
+    if (Platform.OS === "web" && width >= 1024) return 3;
+
+    // còn lại (phone): 2 cột
     return 2;
-  }, [width]);
+  }, [isNativeTablet, width]);
 
   const bigCardWidth = useMemo(() => {
     return Math.floor((innerWidth - gap * (bigCols - 1)) / bigCols);
@@ -430,44 +440,45 @@ export default function HomeScreen() {
           )}
 
           {!isLoggedIn && (
-            <View style={styles.authRow}>
-              <View
-                style={[
-                  styles.neonOuterGold,
-                  hoverBtn === "login" && styles.neonOuterHover,
-                ]}
-              >
+            <View style={[styles.page, { width: pageWidth }]}>
+              <View style={[styles.authRow, isTablet && styles.authRowTablet]}>
+                {/* LOGIN */}
+                <View style={styles.neonOuterGold}>
+                  <Pressable
+                    onPress={() => router.push("/(auth)/login")}
+                    onHoverIn={() => setHoverBtn("login")}
+                    onHoverOut={() => setHoverBtn(null)}
+                    style={({ pressed }) => [
+                      styles.neonInner,
+                      styles.neonInnerGold,
+                      pressed && styles.neonPressed,
+                    ]}
+                  >
+                    <Ionicons name="log-in-outline" size={18} color="#0A1630" />
+                    <Text style={styles.neonTextDark}>Login</Text>
+                  </Pressable>
+                </View>
+
                 <Pressable
-                  onPress={() => router.push("/(auth)/login")}
-                  onHoverIn={() => setHoverBtn("login")}
-                  onHoverOut={() => setHoverBtn(null)}
+                  onPress={() => router.push("/(auth)/register")}
                   style={({ pressed }) => [
-                    styles.neonInner,
-                    styles.neonInnerGold,
-                    pressed && styles.neonPressed,
+                    styles.authBtn,
+                    styles.authBtnGhost,
+                    pressed && { opacity: 0.92 },
                   ]}
                 >
-                  <Ionicons name="log-in-outline" size={18} color="#0A1630" />
-                  <Text style={styles.neonTextDark}>Login</Text>
+                  <Ionicons
+                    name="person-add-outline"
+                    size={18}
+                    color="#E7C06B"
+                  />
+                  <Text style={styles.authBtnGhostText}>Register</Text>
                 </Pressable>
               </View>
-
-              <Pressable
-                onPress={() => router.push("/(auth)/register")}
-                style={({ pressed }) => [
-                  styles.authBtn,
-                  styles.authBtnGhost,
-                  pressed && { opacity: 0.92 },
-                ]}
-              >
-                <Ionicons name="person-add-outline" size={18} color="#E7C06B" />
-                <Text style={styles.authBtnGhostText}>Register</Text>
-              </Pressable>
             </View>
           )}
 
           {/* Main Card Container */}
-
           <View style={[styles.cardContainer, { width: pageWidth }]}>
             {/* Overview Cards */}
             <View style={styles.cardGrid}>
@@ -797,7 +808,7 @@ const styles = StyleSheet.create({
   cardGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
   },
 
   bigCard: {
@@ -1205,5 +1216,9 @@ const styles = StyleSheet.create({
     color: "#E7C06B",
     fontWeight: "900",
     fontSize: 16,
+  },
+  authRowTablet: {
+    width: "100%",
+    paddingHorizontal: 14,
   },
 });

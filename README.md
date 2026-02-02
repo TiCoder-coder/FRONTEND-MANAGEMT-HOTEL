@@ -156,6 +156,15 @@ npx expo start -c
 
 ```
 
+### Chạy (nếu lỗi android studio, lỗi không mở được)
+
+````bash
+~/Android/Sdk/emulator/emulator -avd Medium_Tablet \
+  -no-snapshot -wipe-data \
+  -gpu swiftshader_indirect \
+  -feature -Vulkan \
+  -verbose
+---
 ---
 
 ## ⚙️ Config & Environment
@@ -171,7 +180,7 @@ export const ENV = {
   X_API_KEY: "your-x-api-key",
   TIMEOUT_MS: 20000,
 };
-```
+````
 
 > Backend chạy local:
 
